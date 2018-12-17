@@ -25,7 +25,7 @@ import io.restassured.specification.RequestSpecification;
 public class ReportTest{
 	private static final String ERRO_DATA_NASCIMENTO_DIVERGENTE_RF = "Inválido. [ERROR] Não foi possível validar: Data de nascimento informada está divergente da constante na base de dados da Secretaria da Receita Federal do Brasil.";
 	private static final String URL = "https://api-v2.idwall.co/relatorios";
-	private static final String API_KEY = "9a5c457e-d004-46d2-ad0b-b3f015af0c58";
+	private static final String API_KEY = "24074832-0feb-40cb-91d4-e1ac9cf56dcd";
 	private static final String AUTHORIZATION = "Authorization";
 
 	public ReportRequestDTOFactory reportRequestFactory = new ReportRequestDTOFactory();
@@ -71,27 +71,51 @@ public class ReportTest{
 	private void testarRelatorio(ReportRequestDTO input, String mensagemEsperada, String resultResultado)
 			throws InterruptedException {
 		@SuppressWarnings("rawtypes")
-		ResponseBody body = givenAuthorizedJsonContent()
+		String numero = givenAuthorizedJsonContent()
 			.body(input
 					)
 			.when()
 				.post(URL)
-				;
-		String numero = body.jsonPath()
-			.getString("result.numero");
+			.then()
+				.contentType(ContentType.JSON)
+				.extract()
+				
+				.jsonPath()
+				.getString("result.numero");
+
 		
+		AssertionError result =null;
+		
+		for( int i=0; i<20; i++) {
+			try {
+				Thread.currentThread().sleep(10000);
+				tryOnce(mensagemEsperada, resultResultado, numero);
+				return;
+			}catch(AssertionError e) {
+				result =e;
+			}
+		}
+		
+		if( result != null)
+			throw new RuntimeException("erro ao ver validações de " + numero, result);
+		
+		
+	}
+
+	
+
+
+	private void tryOnce(String mensagemEsperada, String resultResultado, String numero) {
 		givenAuthorizedJsonContent()
-			.pathParam("protocol", numero)
+			
 		.when()
-			.get(URL+"/{protocol}/validacoes")
+			.get(URL+"/" + numero)
 		.then()
 			.assertThat()
 				.body("result.status", equalTo("CONCLUIDO"))
 				.body("result.resultado", equalTo(resultResultado))
 				.body("result.nome", equalTo("consultaPessoaDefault"))
 				.body("result.mensagem",equalTo(mensagemEsperada));
-			
-		
 	}
 
 	 

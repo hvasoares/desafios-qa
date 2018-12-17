@@ -14,7 +14,7 @@ public class ReportRequestDTOFactory {
 		
 		
 		
-		return ReportRequestBuilder.start().dataNascimento("25/07/1987").nome("Gabriel Oliveira").numero("07614917677")
+		return ReportRequestBuilder.start().dataNascimento("25/05/1987").nome("Gabriel Oliveira").numero("07614917677")
 				.build();
 	}
 
@@ -33,3 +33,5 @@ public class ReportRequestDTOFactory {
 		return value;
 	}
 }
+
+
